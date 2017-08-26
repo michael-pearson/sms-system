@@ -3,3 +3,15 @@
  */
 
 @import "~bootstrap/scss/bootstrap";
+
+.form-check-input:only-child
+{
+    position: static;
+}
+
+// Header
+header.navbar ul.navbar-nav
+{
+    font-size: 1rem;
+    font-weight: 200;
+}

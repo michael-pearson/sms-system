@@ -1,7 +1,7 @@
 <?php
 
-namespace AppBundle;
+namespace SmsBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-class AppBundle extends Bundle { }
+class SmsBundle extends Bundle { }

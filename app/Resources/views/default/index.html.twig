@@ -1,11 +1,81 @@
 {% extends 'base.html.twig' %}
 
-{% block stylesheets %}
-    <link rel="stylesheet" href="{{ asset('build/css/app.css') }}">
-{% endblock %}
+{% block content %}
 
-{% block body %}
-    <header class="navbar navbar-expand navbar-dark bg-dark">
-        <a class="navbar-brand" href="/">SMS</a>
-    </header>
+    <div class="jumbotron mt-4">
+        <h1 class="display-3">SMS Project!</h1>
+        <p class="lead">This is a simple project used to demonstrate the use of Symfony, Doctrine, RabbitMQ, Redis and Git.</p>
+        <hr class="my-4">
+
+        {% if app.user %}
+
+            <p class="lead">
+                Use the form below to start sending messages!
+            </p>
+
+        {% else %}
+
+            <p>It doesn't look like you're logged in. To begin using the system, please login.</p>
+            <p class="lead">
+                <a class="btn btn-primary btn-lg" href="/login" role="button">Login</a>
+            </p>
+
+        {% endif %}
+    </div>
+
+    {% if app.user %}
+
+        <ul class="nav nav-tabs" id="tabs" role="tablist">
+
+            <li class="nav-item">
+                <a class="nav-link active" id="send-tab" data-toggle="tab" href="#send" role="tab" aria-controls="send" aria-expanded="true">Send</a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" id="my-messages-tab" data-toggle="tab" href="#my-messages" role="tab" aria-controls="my-messages">My Messages</a>
+            </li>
+
+        </ul>
+
+        <div class="tab-content" id="tabs-content">
+            <div class="tab-pane fade show active" id="send" role="tabpanel" aria-labelledby="send-tab">
+            
+                <h3>Send SMS</h3>
+                {{ form_start(form) }}
+                    {{ form_errors(form) }}
+
+                    <div>
+
+                        {{ form_label(form.number) }}
+                        {{ form_errors(form.number) }}
+                        {{ form_widget(form.number) }}
+
+                    </div>
+                    
+                    <div>
+
+                        {{ form_label(form.message) }}
+                        {{ form_errors(form.message) }}
+                        {{ form_widget(form.message) }}
+
+                    </div>
+                    
+                    <div>
+
+                        {{ form_widget(form.save) }}
+
+                    </div>
+
+                {{ form_end(form) }}
+
+            </div>
+            <div class="tab-pane fade" id="my-messages" role="tabpanel" aria-labelledby="my-messages-tab">
+            
+
+
+            </div>
+        </div>
+
+    {% endif %}
+
 {% endblock %}

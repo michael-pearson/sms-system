@@ -11,6 +11,14 @@ Encore
      */
     .addStyleEntry('css/app', ['./assets/scss/app.scss'])
 
+    .autoProvidejQuery()
+
+    /**
+     * Scripts
+     */
+    .addEntry('js/app', ['./assets/js/app.js'])
+
+
 ;
 
 module.exports = Encore.getWebpackConfig();
