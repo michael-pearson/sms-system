@@ -1,11 +1,14 @@
 /.web-server-pid
 /app/config/parameters.yml
 /build/
+/node_modules/
 /phpunit.xml
+/.php_cs
 /var/*
 !/var/cache
 /var/cache/*
 !var/cache/.gitkeep
+!/var/data
 !/var/logs
 /var/logs/*
 !var/logs/.gitkeep
@@ -15,3 +18,5 @@
 !var/SymfonyRequirements.php
 /vendor/
 /web/bundles/
+/web/build/fonts/glyphicons-*
+/web/build/images/glyphicons-*

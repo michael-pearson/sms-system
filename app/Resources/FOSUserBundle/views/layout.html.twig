@@ -1,0 +1,10 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    {% block title %}Demo Application{% endblock %}
+
+    {% block content %}
+        <link rel="stylesheet" href="{{ asset('build/css/app.css') }}">
+        {% block fos_user_content %}{% endblock %}
+    {% endblock %}
+{% endblock %}
