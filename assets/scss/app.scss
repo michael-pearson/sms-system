@@ -15,3 +15,20 @@ header.navbar ul.navbar-nav
     font-size: 1rem;
     font-weight: 200;
 }
+
+// Index SMS tab
+.tab-content
+{
+    padding: 2rem 0;
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
+    border-width: 0 1px 1px 1px;
+}
+
+// Overrides
+.nav-tabs .nav-link.active,
+.nav-tabs .nav-item.show
+{
+    background-color: #f9f9f9;
+    border-color: #ddd #ddd #f9f9f9;
+}

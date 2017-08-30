@@ -6,6 +6,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 
 class SmsType extends AbstractType
 {
@@ -20,7 +21,7 @@ class SmsType extends AbstractType
     {
         $_builder
             ->add('number', TextType::class)
-            ->add('message', TextType::class)
+            ->add('message', TextareaType::class)
             ->add('save', SubmitType::class, array('label' => 'Send SMS'));
     }
 }

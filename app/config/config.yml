@@ -40,7 +40,7 @@ twig:
 
     # Paths
     paths:
-        '%kernel.project_dir%/app/Resources/views/default': index
+        '%kernel.project_dir%/app/Resources/views': views
 
 # Doctrine Configuration
 doctrine:
@@ -77,3 +77,28 @@ fos_user:
     from_email:
         address: '%mailer_user%'
         sender_name: '%mailer_user%'
+
+# RabbitMq Configuration
+old_sound_rabbit_mq:
+    connections:
+        default:
+            host:   'localhost'
+            port:   5672
+            user:   'guest'
+            password: 'guest'
+            vhost:  '/'
+            lazy:   false
+            connection_timeout: 3
+            read_write_timeout: 3
+            heartbeat: 0
+    producers:
+        send_sms:
+            connection: default
+            exchange_options: {name: 'send-sms', type: direct}
+            service_alias: send_sms
+    consumers:
+        send_sms:
+            connection: default
+            exchange_options: {name: 'send-sms', type: direct}
+            queue_options: {name: 'send-sms'}
+            callback:   send_sms_service

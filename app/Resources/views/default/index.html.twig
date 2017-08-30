@@ -28,50 +28,174 @@
         <ul class="nav nav-tabs" id="tabs" role="tablist">
 
             <li class="nav-item">
-                <a class="nav-link active" id="send-tab" data-toggle="tab" href="#send" role="tab" aria-controls="send" aria-expanded="true">Send</a>
+                <a class="nav-link active" id="send-tab" data-toggle="tab" href="#send-pane" role="tab" aria-controls="send" aria-expanded="true">Send</a>
             </li>
 
             <li class="nav-item">
                 <a class="nav-link" id="my-messages-tab" data-toggle="tab" href="#my-messages" role="tab" aria-controls="my-messages">My Messages</a>
             </li>
 
+            {% if app.user.hasRole('ROLE_USER') %}
+                <li class="nav-item">
+                    <a class="nav-link" id="all-messages-tab" data-toggle="tab" href="#all-messages" role="tab" aria-controls="all-messages">All Messages</a>
+                </li>
+            {% endif %}
+
         </ul>
 
         <div class="tab-content" id="tabs-content">
-            <div class="tab-pane fade show active" id="send" role="tabpanel" aria-labelledby="send-tab">
-            
-                <h3>Send SMS</h3>
-                {{ form_start(form) }}
-                    {{ form_errors(form) }}
+            <div class="tab-pane fade show active" id="send-pane" role="tabpanel" aria-labelledby="send-tab">
 
-                    <div>
+                <div class="container">
+                    <h3 class="col-12 pb-1">Send SMS</h3>
+                    <p class="col-12 pb-4">Fill out the below form to send an SMS. Messages but be longer than 140 characters and the number must be an valid UK mobile phone number.</p>
+                    {{ form_start(form, {'attr': {'class': 'col-12 col-md-6'}}) }}
+                        
+                        {% if form.vars.errors|length > 0 %}
+                            <div class="alert alert-danger mt-2" role="alert">
+                                <ul class="list-unstyled mb-0">
+                                    {% for error in form.vars.errors %}
+                                        <li>{{ error.message }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
 
-                        {{ form_label(form.number) }}
-                        {{ form_errors(form.number) }}
-                        {{ form_widget(form.number) }}
+                        <div class="form-group">
+                            {{ form_label(form.number) }}
+                            {{ form_widget(form.number, 
+                            {
+                                'attr': 
+                                {
+                                    'class': ('form-control' ~ (form.number.vars.valid ? '' : ' is-invalid')), 
+                                    'placeholder': 'UK Mobile Number (e.g. 07504596282)...'
+                                }
+                            })}}
+                            {% if not form.number.vars.valid %}
+                                <div class="alert alert-danger mt-2" role="alert">
+                                    <ul class="list-unstyled mb-0">
+                                        {% for error in form.number.vars.errors %}
+                                            <li>{{ error.message }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
 
-                    </div>
-                    
-                    <div>
+                            {{ form_label(form.message) }}
+                            {{ form_widget(form.message, 
+                            {
+                                'attr': 
+                                {
+                                    'class': 'form-control', 
+                                    'placeholder': 'Message...'
+                                }
+                            })}}
+                            {% if not form.message.vars.valid %}
+                                <div class="alert alert-danger mt-2" role="alert">
+                                    <ul class="list-unstyled mb-0">
+                                        {% for error in form.message.vars.errors %}
+                                            <li>{{ error.message }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                         {% for message in app.flashes('send.success') %}
+                            <div class="alert alert-success" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %} 
 
-                        {{ form_label(form.message) }}
-                        {{ form_errors(form.message) }}
-                        {{ form_widget(form.message) }}
+                        <div class="form-group">
 
-                    </div>
-                    
-                    <div>
+                            {{ form_widget(form.save, {'attr': {'class': 'btn btn-success col-12 col-md-auto'}}) }}
 
-                        {{ form_widget(form.save) }}
+                        </div>
 
-                    </div>
-
-                {{ form_end(form) }}
+                    {{ form_end(form) }}
+                </div>
 
             </div>
+
             <div class="tab-pane fade" id="my-messages" role="tabpanel" aria-labelledby="my-messages-tab">
             
+            {% if myMessages|length > 0 %}
 
+                    <table class="table table-striped table-inverse col-12">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Number</th>
+                                <th>Message</th>
+                                <th>Sent By</th>
+                                <th>Created At</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            {% for sms in myMessages %}
+                                <tr>
+                                    <td>{{ sms.id }}</td>
+                                    <td>{{ sms.number }}</td>
+                                    <td>{{ sms.message }}</td>
+                                    <td>{{ sms.user.username }}</td>
+                                    <td>{{ sms.created_at|date('d-m-Y H:i:s') }}</td>
+                                    <td><span class="badge badge-{{ sms.status.class }}">{{ sms.status.shortname }}</span></td>
+                                </tr>
+                            {% endfor %}
+
+                        </tbody>
+                    </table>
+
+                {% else %}
+
+                    <p class="col-12">There aren't any messages to show!</p>
+
+                {% endif %} 
+
+            </div>
+
+            <div class="tab-pane fade" id="all-messages" role="tabpanel" aria-labelledby="all-messages-tab">
+            
+                 {% if messages|length > 0 %}
+
+                    <table class="table table-striped table-inverse col-12">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Number</th>
+                                <th>Message</th>
+                                <th>Sent By</th>
+                                <th>Created At</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            {% for sms in messages %}
+                                <tr>
+                                    <td>{{ sms.id }}</td>
+                                    <td>{{ sms.number }}</td>
+                                    <td>{{ sms.message }}</td>
+                                    <td>{{ sms.user.username }}</td>
+                                    <td>{{ sms.created_at|date('d-m-Y H:i:s') }}</td>
+                                    <td><span class="badge badge-{{ sms.status.class }}">{{ sms.status.shortname }}</span></td>
+                                </tr>
+                            {% endfor %}
+
+                        </tbody>
+                    </table>
+
+                {% else %}
+
+                    <p class="col-12">There aren't any messages to show!</p>
+
+                {% endif %} 
 
             </div>
         </div>

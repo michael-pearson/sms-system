@@ -19,9 +19,22 @@ class AppKernel extends Kernel
             new SmsBundle\SmsBundle(),
 
             /**
+             * Fixtures bundle.
+             * 
+             * We will be using this to seed the inital type tables, so it cannot
+             * be locked to only dev or test modes.
+             */
+            new Doctrine\Bundle\FixturesBundle\DoctrineFixturesBundle(),
+
+            /**
              * FriendsOfSymfony bundle.
              */
             new FOS\UserBundle\FOSUserBundle(),
+
+            /**
+             * RabbitMQ bundle.
+             */
+            new OldSound\RabbitMqBundle\OldSoundRabbitMqBundle(),
         ];
 
         if (in_array($this->getEnvironment(), ['dev', 'test'], true)) {
