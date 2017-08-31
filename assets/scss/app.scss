@@ -32,3 +32,28 @@ header.navbar ul.navbar-nav
     background-color: #f9f9f9;
     border-color: #ddd #ddd #f9f9f9;
 }
+
+// Register page
+#register-form
+{
+    .parent-of-form-control 
+    {
+        @extend .mb-2;
+        & > div
+        {
+            ul
+            {
+                display: none;
+            }
+            &:first-child
+            {
+                margin-bottom: 1rem;
+            }
+
+            & > input
+            {     
+                @extend .form-control;
+            }
+        }
+    }
+}

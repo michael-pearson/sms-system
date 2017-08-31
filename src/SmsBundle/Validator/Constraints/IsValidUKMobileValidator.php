@@ -7,6 +7,14 @@ use Symfony\Component\Validator\ConstraintValidator;
 
 class IsValidUKMobileValidator extends ConstraintValidator
 {
+    /**
+     * Validates a pass parameter to see if it is a valid UK
+     * mobile phone number.
+     *
+     * @param mixed $_value
+     * @param Constraint $_constraint
+     * @return void
+     */
     public function validate($_value, Constraint $_constraint)
     {
         // If it is not a valid UK mobile phone number.

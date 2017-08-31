@@ -18,15 +18,22 @@ use Twilio\Rest\Client;
 class DefaultController extends Controller
 {
     /**
-     * Renders the index page.
+     * Renders the index page, with all of the users messages
+     * and all of the messages sent by the system if they have
+     * the admin role.
      *
      * @param Request $_request
+     * @return Response
      * 
-     * @Route("/", name="index")
+     * @Route
+     * (
+     *      "/", 
+     *      name="index"
+     * )
      * @Method({"GET"})
      * 
      */
-    public function indexAction(Request $_request)
+    public function indexAction(Request $_request):Response
     {
         // Get the current user.
         $user = $this->getUser();
@@ -41,34 +48,29 @@ class DefaultController extends Controller
             'action' => '/'
         ]);
 
-        // TODO - move repeated code into function.
-        $messages = null;
-        $myMessages = null;
-
-        // If the user is logged in.
-        if($user)
-        {
-            $messages = $this->getAllMessages();
-            $myMessages = $this->getMyMessages();
-        }
-
         // Return the view with the form.
         return $this->render('default/index.html.twig', [
             'form' => $form->createView(),
-            'messages' => $messages,
-            'myMessages' => $myMessages
+            'messages' => $this->getAllMessages(),
+            'myMessages' => $this->getMyMessages()
         ]);
     }
 
     /**
-     * Sends a message.
+     * Sends a message with the message and number provided in the
+     * request body.
      *
      * @param Request $_request
+     * @return Response
      * 
-     * @Route("/", name="sendMessage")
+     * @Route
+     * (
+     *      "/", 
+     *      name="sendMessage"
+     * )
      * @Method({"POST"})
      */
-    public function sendMessage(Request $_request)
+    public function sendMessage(Request $_request):Response
     {
         // Fetch the current user.
         $user = $this->getUser();
@@ -87,28 +89,16 @@ class DefaultController extends Controller
         $form->handleRequest($_request);
 
         // Create a new redis connection.
-        // TODO - put in env
         $client = new RedisClient([
-            'scheme' => 'tcp',
-            'host' => 'localhost',
-            'port' => '6379'
+            'scheme' => getenv('REDIS_SCHEME') ? getenv('REDIS_SCHEME') : 'tcp',
+            'host' => getenv('REDIS_HOST') ? getenv('REDIS_HOST') : 'localhost',
+            'port' => getenv('REDIS_POST') ? getenv('REDIS_POST') : '6379',
         ]);
-
-        $messages = null;
-        $myMessages = null;
-
-        // If the user is logged in.
-        // TODO - move repeated code to function.
-        if($user)
-        {
-            $messages = $this->getAllMessages();
-            $myMessages = $this->getMyMessages();
-        }
 
         // Get the existence of the users key.
         $hasKey = $client->exists("sms-sent." . $user->getId());
 
-        // Check to see if there is a key for the current user.
+        // If there is a sms sent key for the current user.
         if($hasKey)
         {
             // TODO - need a function that rounds the TTL up to stop 0 showing.
@@ -117,13 +107,12 @@ class DefaultController extends Controller
             // Return with the form and errors.
             return $this->render('default/index.html.twig', [
                 'form' => $form->createView(),
-                'messages' => $messages,
-                'myMessages' => $myMessages
+                'messages' => $this->getAllMessages(),
+                'myMessages' => $this->getMyMessages()
             ]);
         }
 
-        // If the form has been submitted, the form is valid and it is not too soon.
-        // TODO add too soon check to function.
+        // If the form has been submitted, and the form is valid.
         if($form->isSubmitted() && $form->isValid())
         {
             // Set the SMS user.
@@ -138,7 +127,7 @@ class DefaultController extends Controller
             // Get the entity manager.
             $em = $this->getDoctrine()->getManager();
 
-            // Queue the entity for INSERT.
+            // Queue the entity for insert.
             $em->persist($sms);
 
             // Push any queued changes.
@@ -153,21 +142,6 @@ class DefaultController extends Controller
 
             // Add the sms to queue.
             $this->get('old_sound_rabbit_mq.send_sms_producer')->publish(serialize($message));
-
-            // Create the client used to send the message.
-            // TODO - move to env
-            $twillioClient = new Client('AC2e25c8eccffce9f3ceca5b99a60803f7', '19862dc33edabc924124bd1930fa11e6');
-
-            // Send the message.
-            // TODO - move to queue.
-            // $twillioClient->messages->create(
-            //     '07507309282', // $message['number']
-            //     [
-            //         'from' => '+441527962622',
-            //         'body' => $message['message'],
-            //         'statusCallback' => $message['callback']
-            //     ]
-            // );
 
             // Add a flash message.
             $this->addFlash('send.success', "SMS queued successfully.");
@@ -189,14 +163,26 @@ class DefaultController extends Controller
     }
 
     /**
-     * The callback route for twillio requests.
+     * The callback route for twillio requests. This function
+     * will change the status of the corresponsing SMS to match
+     * the status sent by the twillio request.
      *
+     * @param int $_id
      * @param Request $_request
+     * @return Response
      * 
-     * @Route("/messages/{id}/callback", name="callback")
+     * @Route
+     * (
+     *      "/messages/{_id}/callback", 
+     *      name="callback",
+     *      requirements=
+     *      {
+     *          "id": "\d+"
+     *      }
+     * )
      * @Method({"POST"})
      */
-    public function callback(Request $_request)
+    public function callback(int $_id, Request $_request):Response
     {
         // Fetch the sms status from the db.
         $status = $this->getStatusByShortname(strtoupper($_request->get('SmsStatus')));
@@ -211,7 +197,7 @@ class DefaultController extends Controller
         }
 
         // Fetch the sms from the db.
-        $sms = $this->getSmsById((int)$_request->get('id'));
+        $sms = $this->getSmsById($_id);
 
         // Set the sms status.
         $sms->setStatus($status);
@@ -230,54 +216,63 @@ class DefaultController extends Controller
     }
 
     /**
-     * Returns a list of the messages stored in the database.
+     * Returns an array containing all of the messages 
+     * stored in the database.
      *
      * @return array
      */
-    private function getAllMessages()
+    private function getAllMessages():?array
     {
-        // Init the messages.
-        $messages = null;
+        // If we have a user.
+        if(!$user = $this->getUser())
+        {
+            return null;
+        }
 
         // If the user has the admin role.
-        if($this->getUser()->hasRole('ROLE_ADMIN'))
+        if($user->hasRole('ROLE_ADMIN'))
         {
             // Fetch all of the messages.
-            $messages = $this->getDoctrine()
+            return $this->getDoctrine()
                 ->getRepository(Sms::class)
                 ->findAllOrderedByDateDesc();
         }
 
-        // Return the messages.
-        return $messages;
+        // User doesn't have the admin role return null.
+        return null;
     }
 
     /**
-     * Returns a list of the messages stored in the database.
+     * Returns an array of the users messages 
+     * stored in the database.
      *
      * @return array
      */
-    private function getMyMessages()
+    private function getMyMessages():?array
     {
-        // Init the messages.
-        $messages = null;
+        // If we have a user.
+        if(!$user = $this->getUser())
+        {
+            return null;
+        }
 
         // If the user has the user role.
-        if($this->getUser()->hasRole('ROLE_USER'))
+        if($user->hasRole('ROLE_USER'))
         {
             // Fetch all of the users messages.
-            $messages = $this->getDoctrine()
+            return $this->getDoctrine()
                 ->getRepository(Sms::class)
                 ->findByUserOrderedByDateDesc($this->getUser());
         }
 
-        // Return the messages.
-        return $messages;
+        // User doesn't have the user role return null.
+        return null;
     }
 
     /**
-     * Returns a status matching the passed shortname.
+     * Returns a Status matching the passed shortname.
      *
+     * @param string $_shortname
      * @return Status
      */
     private function getStatusByShortname(string $_shortname):?Status
@@ -297,6 +292,7 @@ class DefaultController extends Controller
     /**
      * Returns an SMS matching the passed id.
      *
+     * @param int $_id
      * @return SMS
      */
     private function getSmsById(int $_id):?Sms

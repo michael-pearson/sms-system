@@ -8,7 +8,13 @@ use SmsBundle\Entity\Status;
 
 class LoadStatuses implements FixtureInterface
 {
-    public function load(ObjectManager $manager)
+    /**
+     * Loads the default statuses into the database.
+     *
+     * @param ObjectManager $manager
+     * @return void
+     */
+    public function load(ObjectManager $manager):void
     {
         // Add the queued status.
         $status = new Status();
@@ -23,6 +29,15 @@ class LoadStatuses implements FixtureInterface
         $status = new Status();
         $status->setName('Sent');
         $status->setShortname('SENT');
+        $status->setClass('primary');
+
+        // Persist the status.
+        $manager->persist($status);
+
+        // Add the delivered status.
+        $status = new Status();
+        $status->setName('Delivered');
+        $status->setShortname('DELIVERED');
         $status->setClass('success');
 
         // Persist the status.

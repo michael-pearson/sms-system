@@ -3,10 +3,17 @@
 namespace SmsBundle\Repository;
 
 use Doctrine\ORM\EntityRepository;
+use SmsBundle\Entity\Sms;
 
 class SmsRepository extends EntityRepository
 {
-    public function findSingleById(int $_id)
+    /**
+     * Undocumented function
+     *
+     * @param int $_id
+     * @return Sms|null
+     */
+    public function findSingleById(int $_id):?Sms
     {
         // Prepare the doctrine query.
         $query = $this->getEntityManager()->createQuery("
@@ -31,8 +38,10 @@ class SmsRepository extends EntityRepository
 
     /**
      * Fetches all of the messages sent by the system ordered by the date created.
+     *
+     * @return array|null
      */
-    public function findAllOrderedByDateDesc()
+    public function findAllOrderedByDateDesc():?array
     {
         // Prepare the doctrine query.
         $query = $this->getEntityManager()->createQuery("
@@ -59,8 +68,9 @@ class SmsRepository extends EntityRepository
      * Fetches all of the messages sent by the system ordered by the date created.
      *
      * @param int $_user
+     * @return array|null
      */
-    public function findByUserOrderedByDateDesc($_user)
+    public function findByUserOrderedByDateDesc($_user):?array
     {
         // Prepare the doctrine query.
         $query = $this->getEntityManager()->createQuery("

@@ -10,7 +10,7 @@ class SmsProducer
     {
         $this->producer = $_producer;
     }
-
+    
     public function public($_message)
     {
         $this->producer->publish(serialise($_message));

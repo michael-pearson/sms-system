@@ -36,6 +36,8 @@
             </div>
 
             <button type="submit" id="_submit" class="btn btn-primary w-100 mt-2" name="_submit">{{ 'security.login.submit'|trans }}</button>
+
+            <p class="mt-4 w-100 text-center">Don't have an account? <a href="{{ path('fos_user_registration_register') }}">register</a> here.</p>
         </form>
     </div>
 {% endblock %}

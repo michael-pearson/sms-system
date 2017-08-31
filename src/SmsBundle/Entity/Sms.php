@@ -23,7 +23,7 @@ class Sms
     protected $id;
 
     /**
-     * @ORM\Column(type="string", length=100)
+     * @ORM\Column(type="string", length=25)
      * @Assert\NotBlank()
      * @SmsAssert\IsValidUKMobile
      */
@@ -170,8 +170,8 @@ class Sms
     }
 
     /**
-     * The constructor is only called on creation and no on hydration,
-     * so we use it to set default column values.
+     * The constructor is only called on creation and not on hydration,
+     * so we can use it to set default column values.
      */
     public function __construct()
     {

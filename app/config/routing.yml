@@ -2,6 +2,14 @@ app:
     resource: '@AppBundle/Controller/'
     type: annotation
 
+# Override FriendsOfSymfony confirmed route as it is not needed.
+fos_register_redirect:
+    path: /register/confirmed
+    defaults:
+        _controller: FrameworkBundle:Redirect:urlRedirect
+        path: /
+
 # FriendsOfSymfony router.
 fos_user:
     resource: "@FOSUserBundle/Resources/config/routing/all.xml"
+
